@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navigation_home"
+        android:icon="@drawable/ic_home"
+        android:title="首页" />
+    <item
+        android:id="@+id/navigation_clock_in"
+        android:icon="@drawable/ic_clock_in"
+        android:title="打卡" />
+    <item
+        android:id="@+id/navigation_predict"
+        android:icon="@drawable/ic_predict"
+        android:title="检测" />
+    <item
+        android:id="@+id/navigation_profile"
+        android:icon="@drawable/ic_profile"
+        android:title="我的" />
+</menu>

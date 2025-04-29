@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">智能测肤</string>
+    <string-array name="detection_options">
+        <item>使用相机</item>
+        <item>使用相册</item>
+    </string-array>
+    <string name="uploaded_photo">上传的皮肤照片</string>
+    <string name="delete_photo">删除照片</string>
+</resources>

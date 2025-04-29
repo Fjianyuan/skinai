@@ -1,0 +1,384 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="#F5F5F5">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- 顶部标题栏 -->
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="#4CAF50"
+            android:elevation="4dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="检测结果"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:layout_gravity="center" />
+
+            <ImageButton
+                android:id="@+id/btn_close"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_close"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:layout_gravity="end"
+                android:padding="12dp"
+                android:contentDescription="关闭"
+                android:tint="#FFFFFF" />
+        </androidx.appcompat.widget.Toolbar>
+
+        <!-- 结果图像 -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_result_image"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginHorizontal="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp"
+            app:layout_constraintTop_toBottomOf="@id/toolbar"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintDimensionRatio="1:1">
+
+            <ImageView
+                android:id="@+id/result_image_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:contentDescription="检测结果图像" />
+        </androidx.cardview.widget.CardView>
+
+        <!-- 痘痘统计摘要卡片 -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_acne_summary"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginHorizontal="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp"
+            app:layout_constraintTop_toBottomOf="@id/card_result_image"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="检测结果摘要"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="#4CAF50"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- 痘痘数量显示 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="12dp">
+
+                    <ImageView
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:src="@drawable/ic_acne_count"
+                        android:layout_marginEnd="12dp"
+                        android:contentDescription="痘痘数量"
+                        android:tint="#4CAF50" />
+
+                    <TextView
+                        android:id="@+id/tv_acne_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="痘痘数量: 0"
+                        android:textSize="16sp"
+                        android:textColor="#333333"
+                        android:layout_gravity="center_vertical" />
+                </LinearLayout>
+
+                <!-- 严重程度显示 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="12dp">
+
+                    <ImageView
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:src="@drawable/ic_severity"
+                        android:layout_marginEnd="12dp"
+                        android:contentDescription="严重程度"
+                        android:tint="#4CAF50" />
+
+                    <TextView
+                        android:id="@+id/tv_severity"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="严重程度: 无痘痘"
+                        android:textSize="16sp"
+                        android:textColor="#333333"
+                        android:layout_gravity="center_vertical" />
+
+                    <View
+                        android:id="@+id/severity_indicator"
+                        android:layout_width="12dp"
+                        android:layout_height="12dp"
+                        android:background="@drawable/severity_indicator_green"
+                        android:layout_marginStart="8dp"
+                        android:layout_gravity="center_vertical" />
+                </LinearLayout>
+
+                <!-- 痘痘类型显示 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:src="@drawable/ic_acne_type"
+                        android:layout_marginEnd="12dp"
+                        android:contentDescription="痘痘类型"
+                        android:tint="#4CAF50" />
+
+                    <TextView
+                        android:id="@+id/tv_acne_types"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="痘痘类型: 无"
+                        android:textSize="16sp"
+                        android:textColor="#333333"
+                        android:layout_gravity="center_vertical" />
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- 建议卡片 -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_recommendations"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginHorizontal="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp"
+            app:layout_constraintTop_toBottomOf="@id/card_acne_summary"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="护理建议"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="#4CAF50"
+                    android:layout_marginBottom="12dp" />
+
+                <TextView
+                    android:id="@+id/tv_recommendations"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="• 温和清洁面部，避免过度清洁\n• 选择不含油脂的护肤品\n• 不要用手挤压痘痘\n• 保持健康饮食和充足睡眠"
+                    android:textSize="15sp"
+                    android:textColor="#666666"
+                    android:lineSpacingExtra="6dp" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- AI诊断卡片 -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_ai_diagnosis"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginHorizontal="16dp"
+            android:visibility="visible"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp"
+            app:layout_constraintTop_toBottomOf="@id/card_recommendations"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="12dp">
+
+                    <ImageView
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:src="@drawable/ic_ai_diagnosis"
+                        android:layout_marginEnd="12dp"
+                        android:contentDescription="AI诊断"
+                        android:tint="#4285F4" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="AI专家诊断"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="#4285F4" />
+                </LinearLayout>
+
+                <!-- AI诊断分析 -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="诊断分析"
+                    android:textSize="16sp"
+                    android:textColor="#4285F4"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:id="@+id/tv_ai_diagnosis"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="正在生成AI诊断..."
+                    android:textSize="15sp"
+                    android:textColor="#666666"
+                    android:lineSpacingExtra="6dp"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- 皮肤护理建议 -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="皮肤护理建议"
+                    android:textSize="16sp"
+                    android:textColor="#4285F4"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:id="@+id/tv_ai_skin_care_tips"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="正在生成护理建议..."
+                    android:textSize="15sp"
+                    android:textColor="#666666"
+                    android:lineSpacingExtra="6dp"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- 生活习惯建议 -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="生活习惯改善建议"
+                    android:textSize="16sp"
+                    android:textColor="#4285F4"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:id="@+id/tv_ai_lifestyle_suggestions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="正在生成生活建议..."
+                    android:textSize="15sp"
+                    android:textColor="#666666"
+                    android:lineSpacingExtra="6dp"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- 医疗建议 -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="医疗干预建议"
+                    android:textSize="16sp"
+                    android:textColor="#4285F4"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:id="@+id/tv_ai_medical_advice"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="正在生成医疗建议..."
+                    android:textSize="15sp"
+                    android:textColor="#666666"
+                    android:lineSpacingExtra="6dp" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- 按钮区域 -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="24dp"
+            android:layout_marginHorizontal="16dp"
+            app:layout_constraintTop_toBottomOf="@id/card_ai_diagnosis"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_back"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:text="返回"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:cornerRadius="28dp"
+                android:layout_marginEnd="8dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="#4CAF50"
+                android:textColor="#4CAF50"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_save"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:text="保存结果"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:cornerRadius="28dp"
+                android:layout_marginStart="8dp"
+                android:backgroundTint="#4CAF50" />
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

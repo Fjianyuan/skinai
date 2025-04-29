@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- 结果图片 -->
+        <ImageView
+            android:id="@+id/image_result"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_margin="16dp"
+            android:scaleType="centerCrop"
+            android:background="#F0F0F0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:contentDescription="检测结果图片" />
+            
+        <!-- AI诊断标签 -->
+        <TextView
+            android:id="@+id/tv_ai_tag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="AI诊断"
+            android:textSize="10sp"
+            android:textColor="#FFFFFF"
+            android:background="#4285F4"
+            android:paddingHorizontal="6dp"
+            android:paddingVertical="2dp"
+            android:visibility="gone"
+            android:textStyle="bold"
+            app:layout_constraintTop_toTopOf="@id/image_result"
+            app:layout_constraintRight_toRightOf="@id/image_result"
+            android:layout_marginTop="0dp"
+            android:layout_marginRight="0dp" />
+
+        <!-- 记录信息 -->
+        <TextView
+            android:id="@+id/tv_record_date"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="2025-04-18 12:30"
+            android:textColor="#666666"
+            android:textSize="14sp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintStart_toEndOf="@id/image_result"
+            app:layout_constraintEnd_toStartOf="@id/btn_delete"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageButton
+            android:id="@+id/btn_delete"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@android:drawable/ic_menu_delete"
+            android:tint="#FF5252"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="8dp"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tv_record_date"
+            app:layout_constraintBottom_toBottomOf="@id/tv_record_date"
+            android:contentDescription="删除记录" />
+
+        <TextView
+            android:id="@+id/tv_acne_count"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="痘痘数量: 0"
+            android:textColor="#333333"
+            android:textSize="15sp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintStart_toStartOf="@id/tv_record_date"
+            app:layout_constraintEnd_toEndOf="@id/tv_record_date"
+            app:layout_constraintTop_toBottomOf="@id/tv_record_date" />
+
+        <LinearLayout
+            android:id="@+id/severity_container"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintStart_toStartOf="@id/tv_acne_count"
+            app:layout_constraintEnd_toEndOf="@id/tv_acne_count"
+            app:layout_constraintTop_toBottomOf="@id/tv_acne_count"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <TextView
+                android:id="@+id/tv_severity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="严重程度: 轻度"
+                android:textColor="#333333"
+                android:textSize="15sp" />
+
+            <View
+                android:id="@+id/severity_indicator"
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:background="@drawable/severity_indicator_green"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView> 

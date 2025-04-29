@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 应用通用尺寸 -->
+    <dimen name="recycler_padding">4dp</dimen>
+    <dimen name="calendar_day_padding">8dp</dimen>
+</resources> 
