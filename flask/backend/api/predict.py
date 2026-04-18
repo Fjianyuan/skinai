@@ -25,9 +25,13 @@ ACNE_TYPES = ['白头粉刺', '黑头粉刺', '丘疹', '脓包', '结节', '囊
 yolo_model_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "models", "acne615.pt")
 yolo_model = YOLO(yolo_model_path)
 
-# DeepSeek API配置
-DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
-DEEPSEEK_API_KEY = "sk-70b83cb1c9a64f6e863788595d038ee5"  # 直接配置API密钥
+# DeepSeek API配置 (从环境变量/配置文件读取，确保密钥安全)
+try:
+    from config import DEEPSEEK_API_URL, DEEPSEEK_API_KEY
+except ImportError:
+    import os
+    DEEPSEEK_API_URL = os.getenv('DEEPSEEK_API_URL', 'https://api.deepseek.com/v1/chat/completions')
+    DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY', '')
 
 def allowed_file(filename):
     """检查文件是否有允许的扩展名"""

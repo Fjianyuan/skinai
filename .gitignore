@@ -1,15 +1,63 @@
+# ==================== Android ====================
 *.iml
 .gradle
 /local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
+local.properties
+/.idea/
 .DS_Store
 /build
+/app/build
 /captures
 .externalNativeBuild
 .cxx
-local.properties
+
+# ==================== Python ====================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+.env
+.venv/
+venv/
+env/
+
+# ==================== Flask Backend ====================
+# 用户上传的文件 (运行时生成)
+flask/backend/uploads/*
+!flask/backend/uploads/.gitkeep
+
+# 检测结果图片 (运行时生成)
+flask/backend/results/*
+!flask/backend/results/.gitkeep
+
+# AI模型文件 (太大，不适合放在Git仓库)
+flask/backend/models/*.pt
+flask/backend/models/*.pkl
+!flask/backend/models/.gitkeep
+
+# ==================== IDE ====================
+.idea/
+*.swp
+*.swo
+*~
+.vscode/
+
+# ==================== OS ====================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ==================== Misc ====================
+*.log
+*.bak
+retrofit-deps.txt
+
+# 个人笔记/中文文档 (不适合公开仓库)
+云服务器部署指南.md
+公网访问设置指南.md
+内网穿透步骤.md
+other/

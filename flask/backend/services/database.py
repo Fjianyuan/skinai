@@ -13,14 +13,15 @@ except (ImportError, ValueError):
         sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         from config import DB_CONFIG
     except ImportError:
-        # 方式3：使用硬编码配置作为临时解决方案
-        print("警告：使用硬编码的数据库配置")
+        # 方式3：使用环境变量配置作为后备方案
+        import os
+        print("警告：使用环境变量的数据库配置")
         DB_CONFIG = {
-            'host': 'localhost',
-            'port': 1433,
-            'user': 'sa',
-            'password': '682528',
-            'database': 'app'
+            'host': os.getenv('DB_HOST', 'localhost'),
+            'port': int(os.getenv('DB_PORT', '1433')),
+            'user': os.getenv('DB_USER', 'sa'),
+            'password': os.getenv('DB_PASSWORD', ''),
+            'database': os.getenv('DB_NAME', 'app')
         }
 
 # 创建数据库连接

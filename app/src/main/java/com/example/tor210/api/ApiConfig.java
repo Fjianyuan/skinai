@@ -12,17 +12,17 @@ public class ApiConfig {
     public static final String LOCALHOST_IP = "127.0.0.1";
     
     // 局域网IP，需要根据你的实际网络环境替换
-    public static final String SERVER_IP = "192.168.55.249"; // 局域网IP地址
-    
+    public static final String SERVER_IP = "YOUR_LAN_IP"; // 局域网IP地址
+
     // 公网IP地址，用于远程访问服务器
     // 注意：请替换为您的实际公网IP地址或域名
-    public static final String PUBLIC_IP = "81.70.9.106";
+    public static final String PUBLIC_IP = "YOUR_PUBLIC_IP";
     
     /**
      * 当前使用的服务器地址，根据需要修改:
      * 1. 使用模拟器测试时，使用 LOCAL_IP (10.0.2.2)
      * 2. 在真机上访问同一设备上的服务器，使用 LOCALHOST_IP (127.0.0.1)
-     * 3. 连接局域网内的服务器，使用 SERVER_IP (192.168.55.249)
+     * 3. 连接局域网内的服务器，使用 SERVER_IP (192.168.84.249)
      * 4. 连接公网服务器，使用 PUBLIC_IP
      */
     // 根据您的测试日志，服务器运行在局域网IP地址上，因此应该使用SERVER_IP
