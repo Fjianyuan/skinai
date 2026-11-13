@@ -3,6 +3,7 @@ package com.example.tor210.database.api;
 import android.content.Context;
 import android.util.Log;
 
+import com.example.tor210.api.ApiConfig;
 import com.example.tor210.database.DatabaseConfig;
 import com.example.tor210.database.models.ChatHistory;
 import com.example.tor210.database.models.ChatMessage;
@@ -44,10 +45,14 @@ public class ApiClient {
     }
     
     // 获取用户的所有聊天历史
-    public void getChatHistories(String userId, ApiCallback<List<ChatHistory>> callback) {
-        String url = DatabaseConfig.BASE_API_URL + "chatHistories?userId=" + userId;
+    public void getChatHistories(String token, ApiCallback<List<ChatHistory>> callback) {
+        if (token == null || token.isEmpty()) {
+            callback.onError("请先登录");
+            return;
+        }
         Request request = new Request.Builder()
-                .url(url)
+                .url(ApiConfig.CHAT_HISTORY_ENDPOINT)
+                .header(ApiConfig.HEADER_AUTHORIZATION, ApiConfig.getAuthorizationHeader(token))
                 .get()
                 .build();
         

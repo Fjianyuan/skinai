@@ -50,10 +50,8 @@ def get_deepseek_diagnosis(acne_count, severity, acne_types, user_description=""
     返回:
     - 诊断报告字典
     """
-    print(f"开始调用DeepSeek API, 参数: acne_count={acne_count}, severity={severity}, types={acne_types}")
     
     if not DEEPSEEK_API_KEY:
-        print("错误: DeepSeek API密钥未配置")
         current_app.logger.error("未配置DeepSeek API密钥")
         return {
             "diagnosis": "无法生成AI诊断报告（API密钥未配置）",
@@ -88,7 +86,6 @@ def get_deepseek_diagnosis(acne_count, severity, acne_types, user_description=""
     """
     
     try:
-        print(f"使用API密钥: {DEEPSEEK_API_KEY[:5]}...{DEEPSEEK_API_KEY[-5:]}")
         # 调用DeepSeek API
         headers = {
             "Content-Type": "application/json",
@@ -105,12 +102,9 @@ def get_deepseek_diagnosis(acne_count, severity, acne_types, user_description=""
             "response_format": {"type": "json_object"}  # 指定JSON输出
         }
         
-        print("发送请求到DeepSeek API...")
-        response = requests.post(DEEPSEEK_API_URL, headers=headers, json=data)
-        print(f"DeepSeek API返回状态码: {response.status_code}")
+        response = requests.post(DEEPSEEK_API_URL, headers=headers, json=data, timeout=15)
         
         if response.status_code != 200:
-            print(f"DeepSeek API错误: {response.text}")
             return {
                 "diagnosis": f"调用AI服务出错(HTTP {response.status_code})",
                 "skin_care_tips": ["无法连接到AI诊断服务"],
@@ -121,17 +115,13 @@ def get_deepseek_diagnosis(acne_count, severity, acne_types, user_description=""
         response.raise_for_status()  # 如果请求失败，抛出异常
         
         result = response.json()
-        print(f"DeepSeek API返回结果: {result}")
         
         # 解析DeepSeek的响应
         if 'choices' in result and len(result['choices']) > 0:
             content = result['choices'][0]['message']['content']
-            print(f"DeepSeek返回内容: {content[:100]}...")
             diagnosis_data = json.loads(content)
             return diagnosis_data
         else:
-            print(f"DeepSeek API返回了不符合预期的响应: {result}")
-            current_app.logger.error(f"DeepSeek API返回了不符合预期的响应: {result}")
             return {
                 "diagnosis": "无法解析AI诊断报告",
                 "skin_care_tips": ["获取诊断报告时发生错误"],
@@ -139,9 +129,8 @@ def get_deepseek_diagnosis(acne_count, severity, acne_types, user_description=""
                 "medical_advice": ["请咨询专业医生获取更准确的建议"]
             }
             
-    except Exception as e:
-        print(f"调用DeepSeek API出错: {str(e)}")
-        current_app.logger.error(f"调用DeepSeek API出错: {str(e)}")
+    except (requests.RequestException, ValueError, KeyError, IndexError, TypeError):
+        current_app.logger.warning("DeepSeek request or response handling failed")
         return {
             "diagnosis": "生成AI诊断报告时发生错误",
             "skin_care_tips": ["无法连接到AI诊断服务"],
@@ -273,7 +262,8 @@ def predict():
                 # Base64编码
                 image_base64 = base64.b64encode(image_bytes).decode('utf-8')
         except Exception as e:
-            return jsonify({'error': f'图片编码过程中出错: {str(e)}'}), 500
+            current_app.logger.exception('Could not encode prediction image')
+            return jsonify({'error': '图片编码失败'}), 500
         
         # 根据检测到的痘痘数量确定痘痘类型
         acne_types = []
@@ -308,7 +298,7 @@ def predict():
     
     except Exception as e:
         current_app.logger.error(f"处理过程中出错: {str(e)}")
-        return jsonify({'error': f'处理过程中出错: {str(e)}'}), 500
+        return jsonify({'error': '图片处理失败'}), 500
 
 @predict_api.route('/results/<filename>')
 def get_result_image(filename):

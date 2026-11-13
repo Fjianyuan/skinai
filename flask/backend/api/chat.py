@@ -1,21 +1,16 @@
-from flask import Blueprint, request, jsonify
-import sys
-import os
+from flask import Blueprint, g, jsonify
 
-# 添加父目录到模块搜索路径
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from middleware.auth_middleware import login_required
 from services.database import get_db_connection
-from datetime import datetime
 
 # 修改蓝图定义，与app.py的导入保持一致
 chat_api = Blueprint('chat_api', __name__, url_prefix='/api/chat')
 
 # 修改路由定义，去掉前缀（因为已经在url_prefix中定义）
 @chat_api.route('/histories', methods=['GET'])
+@login_required
 def get_chat_histories():
-    user_id = request.args.get('userId')
-    if not user_id:
-        return jsonify({'error': 'userId is required'}), 400
+    user_id = g.user['id']
     
     conn = get_db_connection()
     if conn is None:
