@@ -8,8 +8,8 @@ load_dotenv()
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # 应用配置
-DEBUG = os.getenv('FLASK_DEBUG', 'True').lower() in ('true', '1', 'yes')
-HOST = os.getenv('FLASK_HOST', '0.0.0.0')
+DEBUG = os.getenv('FLASK_DEBUG', 'False').lower() in ('true', '1', 'yes')
+HOST = os.getenv('FLASK_HOST', '127.0.0.1')
 PORT = int(os.getenv('FLASK_PORT', 5000))
 
 # 文件路径
