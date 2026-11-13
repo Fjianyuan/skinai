@@ -37,7 +37,7 @@ Set the SQL Server connection details in `.env`, using an existing database. Add
 .\.venv\Scripts\python.exe app.py
 ```
 
-Check `http://127.0.0.1:5000/health`. Then open the repository in Android Studio and set `CURRENT_IP` in [`ApiConfig.java`](app/src/main/java/com/example/tor210/api/ApiConfig.java). Use `LOCAL_IP` (`10.0.2.2`) for the Android emulator, or set `SERVER_IP` to the backend computer's LAN address for a physical device.
+Check `http://127.0.0.1:5000/health`. Then open the repository in Android Studio and set `CURRENT_IP` in [`ApiConfig.java`](app/src/main/java/com/example/tor210/api/ApiConfig.java). Use `LOCAL_IP` (`10.0.2.2`) for the Android emulator. For a physical device on a trusted LAN, set `FLASK_HOST` in `.env` to the backend computer's LAN address and use that same address for `SERVER_IP`. Keep `FLASK_DEBUG=False`, including in any existing `.env` created from an earlier template.
 
 Use test images you have permission to process. The backend saves uploads locally, and the current Android client uses HTTP for development. SkinAI is an educational prototype for image analysis and has no clinical validation.
 
