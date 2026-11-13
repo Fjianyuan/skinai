@@ -19,6 +19,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.tor210.api.UserManager;
 import com.example.tor210.database.api.ApiClient;
 import com.example.tor210.database.models.ChatHistory;
 import com.example.tor210.database.models.ChatMessage;
@@ -124,7 +125,8 @@ public class AIChatFragment extends Fragment {
     }
     
     private void showChatHistories() {
-        apiClient.getChatHistories(userId, new ApiClient.ApiCallback<List<ChatHistory>>() {
+        String token = UserManager.getInstance(requireContext()).getToken();
+        apiClient.getChatHistories(token, new ApiClient.ApiCallback<List<ChatHistory>>() {
             @Override
             public void onSuccess(List<ChatHistory> result) {
                 if (result.isEmpty()) {
