@@ -25,6 +25,11 @@ for directory in [MODEL_DIR, UPLOAD_FOLDER, RESULT_FOLDER]:
 # 模型文件
 YOLO_MODEL_PATH = os.path.join(MODEL_DIR, 'acne615.pt')
 FASTAI_MODEL_PATH = os.path.join(MODEL_DIR, 'model_2.1.0.pkl')
+PREDICTION_MODE = os.getenv('PREDICTION_MODE', 'auto').strip().lower()
+FACE_UNET_PATH = os.path.join(MODEL_DIR, 'face_unet.onnx')
+LESION_UNET_PATH = os.path.join(MODEL_DIR, 'lesion_unet.onnx')
+FACE_UNET_INPUT_SIZE = int(os.getenv('FACE_UNET_INPUT_SIZE', '256'))
+LESION_UNET_INPUT_SIZE = int(os.getenv('LESION_UNET_INPUT_SIZE', '256'))
 
 # 数据库配置 (通过环境变量配置，确保敏感信息不暴露在代码中)
 DB_CONFIG = {
@@ -41,3 +46,4 @@ DEEPSEEK_API_URL = os.getenv('DEEPSEEK_API_URL', 'https://api.deepseek.com/v1/ch
 
 # 上传文件配置
 MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 限制上传大小为16MB
+
