@@ -37,6 +37,7 @@ flask/backend/results/*
 # AI模型文件 (太大，不适合放在Git仓库)
 flask/backend/models/*.pt
 flask/backend/models/*.pkl
+flask/backend/models/*.onnx
 !flask/backend/models/.gitkeep
 
 # ==================== IDE ====================
@@ -61,3 +62,4 @@ retrofit-deps.txt
 公网访问设置指南.md
 内网穿透步骤.md
 other/
+

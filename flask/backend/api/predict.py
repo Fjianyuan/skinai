@@ -1,16 +1,22 @@
-from flask import Blueprint, request, jsonify, current_app, send_from_directory
+import base64
+import json
 import os
 import uuid
-import cv2
-import numpy as np
-from werkzeug.utils import secure_filename
-from ultralytics import YOLO
-from PIL import Image
+from functools import lru_cache
 from io import BytesIO
-import base64
-from datetime import datetime
+from pathlib import Path
+
+import cv2
 import requests
-import json
+from flask import Blueprint, current_app, jsonify, request, send_from_directory
+from PIL import Image
+from werkzeug.utils import secure_filename
+
+from config import (
+    DEEPSEEK_API_KEY, DEEPSEEK_API_URL, FACE_UNET_INPUT_SIZE, FACE_UNET_PATH,
+    LESION_UNET_INPUT_SIZE, LESION_UNET_PATH, PREDICTION_MODE, YOLO_MODEL_PATH,
+)
+from services.unet_segmentation import BinaryUNet, segment_lesions, select_prediction_mode
 
 # 创建蓝图
 predict_api = Blueprint('predict_api', __name__, url_prefix='/api/predict')
@@ -21,17 +27,20 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 # 痘痘类型映射
 ACNE_TYPES = ['白头粉刺', '黑头粉刺', '丘疹', '脓包', '结节', '囊肿']
 
-# 加载预训练的 YOLOv8 模型
-yolo_model_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "models", "acne615.pt")
-yolo_model = YOLO(yolo_model_path)
+@lru_cache(maxsize=1)
+def load_prediction_models():
+    face_path = Path(FACE_UNET_PATH)
+    lesion_path = Path(LESION_UNET_PATH)
+    mode = select_prediction_mode(PREDICTION_MODE, face_path, lesion_path)
+    if mode == 'unet':
+        return mode, (
+            BinaryUNet(face_path, FACE_UNET_INPUT_SIZE),
+            BinaryUNet(lesion_path, LESION_UNET_INPUT_SIZE),
+        )
 
-# DeepSeek API配置 (从环境变量/配置文件读取，确保密钥安全)
-try:
-    from config import DEEPSEEK_API_URL, DEEPSEEK_API_KEY
-except ImportError:
-    import os
-    DEEPSEEK_API_URL = os.getenv('DEEPSEEK_API_URL', 'https://api.deepseek.com/v1/chat/completions')
-    DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY', '')
+    from ultralytics import YOLO
+    return mode, YOLO(YOLO_MODEL_PATH)
+
 
 def allowed_file(filename):
     """检查文件是否有允许的扩展名"""
@@ -163,6 +172,12 @@ def predict():
     user_description = request.form.get('description', '')
     
     try:
+        mode, models = load_prediction_models()
+    except (ImportError, OSError, ValueError, cv2.error):
+        current_app.logger.exception('Prediction models are unavailable')
+        return jsonify({'error': '图像推理模型不可用'}), 503
+
+    try:
         # 生成唯一文件名并保存
         filename = secure_filename(file.filename)
         ext = filename.rsplit('.', 1)[1].lower()
@@ -170,56 +185,61 @@ def predict():
         file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], unique_filename)
         file.save(file_path)
         
-        # 使用 YOLOv8 进行目标检测
-        results = yolo_model(file_path, conf=0.5)
-        
-        # 读取原始图像
         original_img = cv2.imread(file_path)
-        
-        # 获取检测框
-        if len(results) > 0 and hasattr(results[0], 'boxes') and results[0].boxes is not None:
-            boxes = results[0].boxes
-            
-            # 绘制自定义圆形标记（而不是方框）
-            for box in boxes:
-                # 获取边界框坐标和置信度
-                x1, y1, x2, y2 = map(int, box.xyxy[0])
-                conf = float(box.conf[0])
-                
-                # 计算圆心和半径
-                center_x = (x1 + x2) // 2
-                center_y = (y1 + y2) // 2
-                radius = max(int(min(x2 - x1, y2 - y1) * 0.5), 5)  # 确保圆形不会太小
-                
-                # 根据置信度调整颜色 (从黄色到红色)
-                # 高置信度为红色，低置信度为黄色
-                red = int(255)
-                green = int(255 * (1 - conf))
-                color = (0, green, red)  # OpenCV使用BGR格式
-                
-                # 绘制美观的圆形标记
-                # 1. 先绘制一个较大的模糊圆形作为光晕效果
-                blur_radius = radius + 5
-                overlay = original_img.copy()
-                cv2.circle(overlay, (center_x, center_y), blur_radius, color, -1)
-                cv2.addWeighted(overlay, 0.2, original_img, 0.8, 0, original_img)
-                
-                # 2. 绘制主要的半透明圆形
-                overlay = original_img.copy()
-                cv2.circle(overlay, (center_x, center_y), radius, color, -1)
-                cv2.addWeighted(overlay, 0.4, original_img, 0.6, 0, original_img)
-                
-                # 3. 绘制圆形边缘
-                cv2.circle(original_img, (center_x, center_y), radius, color, 2)
-        
+        if original_img is None:
+            return jsonify({'error': '无法读取上传的图像'}), 400
+
+        contours = None
+        if mode == 'unet':
+            contours = segment_lesions(original_img, *models)
+            if contours is None:
+                return jsonify({'error': '未检测到可分割的面部区域'}), 422
+            acne_count = len(contours)
+            cv2.drawContours(original_img, contours, -1, (0, 160, 255), 2)
+        else:
+            results = models(file_path, conf=0.5)
+            acne_count = 0
+            # 获取检测框
+            if len(results) > 0 and hasattr(results[0], 'boxes') and results[0].boxes is not None:
+                boxes = results[0].boxes
+                acne_count = len(boxes)
+
+                # 绘制自定义圆形标记（而不是方框）
+                for box in boxes:
+                    # 获取边界框坐标和置信度
+                    x1, y1, x2, y2 = map(int, box.xyxy[0])
+                    conf = float(box.conf[0])
+
+                    # 计算圆心和半径
+                    center_x = (x1 + x2) // 2
+                    center_y = (y1 + y2) // 2
+                    radius = max(int(min(x2 - x1, y2 - y1) * 0.5), 5)  # 确保圆形不会太小
+
+                    # 根据置信度调整颜色 (从黄色到红色)
+                    # 高置信度为红色，低置信度为黄色
+                    red = int(255)
+                    green = int(255 * (1 - conf))
+                    color = (0, green, red)  # OpenCV使用BGR格式
+
+                    # 绘制美观的圆形标记
+                    # 1. 先绘制一个较大的模糊圆形作为光晕效果
+                    blur_radius = radius + 5
+                    overlay = original_img.copy()
+                    cv2.circle(overlay, (center_x, center_y), blur_radius, color, -1)
+                    cv2.addWeighted(overlay, 0.2, original_img, 0.8, 0, original_img)
+
+                    # 2. 绘制主要的半透明圆形
+                    overlay = original_img.copy()
+                    cv2.circle(overlay, (center_x, center_y), radius, color, -1)
+                    cv2.addWeighted(overlay, 0.4, original_img, 0.6, 0, original_img)
+
+                    # 3. 绘制圆形边缘
+                    cv2.circle(original_img, (center_x, center_y), radius, color, 2)
+
         # 保存处理后的图像
         result_image_path = os.path.join(current_app.config['RESULT_FOLDER'], unique_filename)
-        cv2.imwrite(result_image_path, original_img)
-
-        # 计算痘痘数量并确定严重程度
-        acne_count = 0
-        if len(results) > 0 and hasattr(results[0], 'boxes') and results[0].boxes is not None:
-            acne_count = len(results[0].boxes)
+        if not cv2.imwrite(result_image_path, original_img):
+            return jsonify({'error': '无法保存标注图像'}), 500
         
         # 根据痘痘数量确定严重程度
         severity = "无痘痘"
@@ -236,38 +256,20 @@ def predict():
         result_image_url = f"http://{server_address}/api/predict/results/{unique_filename}"
         
         # 添加图片的Base64编码
-        image_base64 = ""
         try:
-            with open(result_image_path, "rb") as img_file:
-                image_bytes = img_file.read()
-                image_size_kb = len(image_bytes) / 1024
-                
-                # 如果图片太大，尝试压缩（超过1MB）
-                if image_size_kb > 1000:
-                    img = Image.open(BytesIO(image_bytes))
-                    # 计算新尺寸，保持宽高比
-                    width, height = img.size
-                    if width > 1280 or height > 1280:
-                        # 等比例缩小
-                        factor = min(1280/width, 1280/height)
-                        new_width = int(width * factor)
-                        new_height = int(height * factor)
-                        img = img.resize((new_width, new_height), Image.LANCZOS)
-                    
-                    # 保存为JPEG，使用较高质量但不是最高
-                    output = BytesIO()
-                    img.save(output, format='JPEG', quality=85)
-                    image_bytes = output.getvalue()
-                
-                # Base64编码
-                image_base64 = base64.b64encode(image_bytes).decode('utf-8')
-        except Exception as e:
+            with Image.open(result_image_path) as annotated:
+                if os.path.getsize(result_image_path) > 1000 * 1024:
+                    annotated.thumbnail((1280, 1280), Image.Resampling.LANCZOS)
+                output = BytesIO()
+                annotated.convert('RGB').save(output, format='JPEG', quality=85)
+                image_base64 = base64.b64encode(output.getvalue()).decode('utf-8')
+        except OSError:
             current_app.logger.exception('Could not encode prediction image')
             return jsonify({'error': '图片编码失败'}), 500
         
         # 根据检测到的痘痘数量确定痘痘类型
         acne_types = []
-        if acne_count > 0:
+        if mode == 'yolo' and acne_count > 0:
             if acne_count <= 3:
                 acne_types = [ACNE_TYPES[0], ACNE_TYPES[2]]  # 白头粉刺、丘疹
             elif acne_count <= 7:
@@ -283,18 +285,17 @@ def predict():
             user_description=user_description
         )
         
-        # 返回结果
-        return jsonify({
-            'status': 'success',
-            'data': {
-                'result_image_url': result_image_url,
-                'image_base64': f"data:image/jpeg;base64,{image_base64}",
-                'acne_count': acne_count,
-                'severity': severity,
-                'acne_types': acne_types,
-                'ai_diagnosis': ai_diagnosis  # 添加AI诊断报告
-            }
-        })
+        data = {
+            'result_image_url': result_image_url,
+            'image_base64': f"data:image/jpeg;base64,{image_base64}",
+            'acne_count': acne_count,
+            'severity': severity,
+            'acne_types': acne_types,
+            'ai_diagnosis': ai_diagnosis,
+        }
+        if contours is not None:
+            data['lesion_contours'] = [contour.reshape(-1, 2).tolist() for contour in contours]
+        return jsonify({'status': 'success', 'data': data})
     
     except Exception as e:
         current_app.logger.error(f"处理过程中出错: {str(e)}")
@@ -340,3 +341,4 @@ def get_prediction_history():
         'status': 'success',
         'history': history
     })
+

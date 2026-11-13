@@ -8,6 +8,7 @@ SkinAI 是学生团队开发的面部痤疮检测原型。Android 客户端将�
 
 ## 公开代码
 
-当前仓库的 [Flask 推理接口](flask/backend/api/predict.py) 直接对上传图像运行 YOLOv8，并用 OpenCV 绘制检测结果。配置 DeepSeek 后，后端可以根据检测摘要和用户选填的文字描述生成文本。检测记录和打卡数据由 SQL Server 保存。
+当前仓库的 [Flask 推理接口](flask/backend/api/predict.py) 支持两阶段 U-Net。第一个 U-Net 分割面部区域，第二个 U-Net 在裁剪并遮蔽背景的面部图像中分割痤疮。后端把轮廓坐标映射回原图，并返回标注图和轮廓点。原有的 YOLOv8 检测模式也可以使用。配置 DeepSeek 后，后端可以根据检测摘要和用户选填的文字描述生成文本。检测记录和打卡数据由 SQL Server 保存。
 
-公开仓库包含 Android 客户端和 Flask 后端。复现研究原型还需要训练数据、模型权重和 U-Net 训练流程。运行公开版本所需的配置见 [README](README.md)。
+运行两阶段推理需要面部分割和痤疮分割各一份训练好的 ONNX 模型。权重文件名、输入格式和配置步骤见 [README](README.md)。
+
